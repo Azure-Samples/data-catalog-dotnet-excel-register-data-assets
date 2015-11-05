@@ -1,0 +1,50 @@
+{{
+    "name": "AdventureWorks2014Info",
+    "dataSource":
+    {{
+        "sourceType": "SQL Server",
+        "objectType": "Database",
+        "formatType": "Structured"
+    }}
+    ,
+    "dsl":
+    {{
+        "protocol": "tds",
+        "authentication": "sql",
+        "address":
+        {{
+            "server": "APISample\\APIAdHocSample1",
+            "database": "AdventureWorks2014",
+        }}
+    }}
+    ,
+    "lastRegisteredBy":
+    {{
+        "upn": "user1@contoso.com",
+        "firstName": "FirstName",
+        "lastName": "LastName"
+    }}
+    ,
+    "lastRegisteredTime": "{0}",
+    "descriptions": [
+    {{
+        "friendlyName": "AdventureWorks2014Info",
+        "tags": [
+        "APIAdHocSample"
+        ],
+        "description": "",
+        "__creatorId": "user1@contoso.com",
+        "modifiedTime": "{0}"
+    }}
+    ],
+	"experts": [  
+    {{
+		"experts": ["expert1@contoso.com", "expert2@contoso.com"],
+		"__creatorId": "user1@contoso.com",
+		"modifiedTime": "{0}"
+    }}
+    ],
+
+    "__creatorId": "APIAdHocSample",
+    "modifiedTime": "{0}"
+}}
