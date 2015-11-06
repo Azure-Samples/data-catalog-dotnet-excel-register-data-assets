@@ -1,7 +1,7 @@
 ---
 services: data-catalog
 platforms: dotnet
-author: derrickv
+author: dvana
 ---
 
 # Azure Data Catalog - Bulk register and annotate
