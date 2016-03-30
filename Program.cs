@@ -62,7 +62,7 @@ namespace ConsoleApplication
             if (authResult == null)
             {
                 //Resource Uri for Data Catalog API
-                string resourceUri = "https://datacatalog.azure.com";
+                string resourceUri = "https://api.azuredatacatalog.com";
 
                 //To learn how to register a client app and get a Client ID, see https://msdn.microsoft.com/en-us/library/azure/mt403303.aspx#clientID   
                 string clientId = clientIDFromAzureAppRegistration;
@@ -99,7 +99,7 @@ namespace ConsoleApplication
             //ExcelTableToDataTable() is an Extension method which converts an Excel Table to a Data Table
             DataTable dt = new DataTable();
             dt.ExcelTableToDataTable(path, sheetName, tableName);
-            
+
             //Get the Data Asset JSON template
             string jsonAssetTemplate = new StreamReader(string.Format(@"{0}\AdHocSample.json", sampleRootPath)).ReadToEnd();
             string jsonAssetPayload = string.Empty;
@@ -114,19 +114,17 @@ namespace ConsoleApplication
                 description = row["Description"].ToString();
 
                 //Create the JSON payload from Table column
-                jsonAssetPayload = string.Format(jsonAssetTemplate, containerId, name, DateTime.UtcNow);
+                jsonAssetPayload = string.Format(jsonAssetTemplate, containerId, name);
 
                 //Use the container id returned from the registration of the container to register the asset.
                 //To register a data asset, use "tables" as view type
-                string assetId = RegisterDataAsset(catalogName, jsonAssetPayload, "tables");
-                Console.WriteLine(string.Format("Data Asset Registered: {0} - {1}", name, assetId));
+                string assetUrl = RegisterDataAsset(catalogName, jsonAssetPayload, "tables");
+                Console.WriteLine("Data Asset Registered: {0} - {1}", name, assetUrl);
 
-                //Annotate Data Asset with the Description column
-                string descriptionJson = DescriptionJson(description, "user1@contoso.com", DateTime.UtcNow.ToString());
                 //Annotate a description
-                AnnotateDataAsset(catalogName, assetId, "descriptions", descriptionJson);
+                AnnotateDataAsset(assetUrl, "descriptions", DescriptionJson(description));
 
-                Console.WriteLine(string.Format("Data Asset Description Annotated: {0}", assetId));
+                Console.WriteLine("Data Asset Description Annotated: {0}", assetUrl);
             }
         }
 
@@ -137,12 +135,12 @@ namespace ConsoleApplication
         // To register a data asset:
         //  1. Register a data source container. viewType = containers
         //  2. Register a data asset using a container id. viewType = tables
-        static string RegisterDataAsset(string catalogName, string json, string viewType)
+        private static string RegisterDataAsset(string catalogName, string json, string viewType)
         {
             string location = string.Empty;
             string publishResultStatus = string.Empty;
 
-            string fullUri = string.Format("https://api.azuredatacatalog.com/catalogs/{0}/views/{1}?api-version=2015-07.1.0-Preview", catalogName, viewType);
+            string fullUri = string.Format("https://api.azuredatacatalog.com/catalogs/{0}/views/{1}?api-version=2016-03-30", catalogName, viewType);
 
             //Create a POST WebRequest as a Json content type
             HttpWebRequest request = System.Net.WebRequest.Create(fullUri) as System.Net.HttpWebRequest;
@@ -185,11 +183,11 @@ namespace ConsoleApplication
 
         //Annotate Data Asset:
         // The Annotate Data Asset operation annotates an asset.
-        static string AnnotateDataAsset(string catalogName, string viewType, string jsonNode, string json)
+        private static string AnnotateDataAsset(string viewUrl, string nestedViewName, string json)
         {
             string responseString = string.Empty;
 
-            string fullUri = string.Format("https://api.azuredatacatalog.com/catalogs/{0}/views/{1}/{2}?api-version=2015-07.1.0-Preview", catalogName, viewType, jsonNode);
+            string fullUri = string.Format("{0}/{1}?api-version=2016-03-30", viewUrl, nestedViewName);
 
             //Create a POST WebRequest as a Json content type
             HttpWebRequest request = System.Net.WebRequest.Create(fullUri) as System.Net.HttpWebRequest;
@@ -230,7 +228,7 @@ namespace ConsoleApplication
         static HttpWebResponse SetRequestAndGetResponse(HttpWebRequest request, string payload = null)
         {
             while (true)
-            {   
+            {
                 //Add a guid to help with diagnostics
                 string guid = Guid.NewGuid().ToString();
                 request.Headers.Add("x-ms-client-request-id", guid);
@@ -272,13 +270,17 @@ namespace ConsoleApplication
         }
 
         // Description JSON
-        static string DescriptionJson(string description, string creatorId, string modifiedTime)
+        private static string DescriptionJson(string description)
         {
-            return "{" +
-                "\"description\": \"" + description + "\"," +
-                "\"__creatorId\": \"" + creatorId + "\"," +
-                "\"modifiedTime\": \"" + modifiedTime + "\"" +
-                "}";
+            return string.Format(@"
+{{
+    ""properties"" : {{
+        ""key"": ""{0}"",
+        ""fromSourceSystem"": false,
+        ""description"": ""{1}""
+    }}
+}}
+", Guid.NewGuid().ToString("N"), description);
         }
     }
 }

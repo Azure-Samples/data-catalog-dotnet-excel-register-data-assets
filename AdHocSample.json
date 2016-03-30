@@ -1,35 +1,44 @@
 {{
-    "containerId": "{0}",
-    "name": "{1}",
-    "dataSource": {{
-        "sourceType": "SQL Server",
-        "objectType": "Table",
-        "formatType": "Structured"
-    }},
-    "dsl": {{
-        "protocol": "tds",
-        "authentication": "sql",
-        "address": {{
-            "server": "APISample\\APIAdHocSample1",
-            "database": "AdventureWorks2014",
-            "schema": "dbo",
-            "object": "{1}"
+     "properties":  {{
+        "containerId": "{0}",
+        "name": "{1}",
+        "fromSourceSystem": false,
+        "dataSource": {{
+            "sourceType": "SQL Server",
+            "objectType": "Table"
+        }},
+        "dsl": {{
+            "protocol": "tds",
+            "authentication": "sql",
+            "address": {{
+                "server": "APISample\\APIAdHocSample1",
+                "database": "AdventureWorks2014",
+                "schema": "dbo",
+                "object": "{1}"
+            }}
+        }},
+        "lastRegisteredBy": {{
+            "upn": "user1@contoso.com",
+            "firstName": "FirstName",
+            "lastName": "LastName"
         }}
-    }},
-    "lastRegisteredBy": {{
-        "upn": "user1@contoso.com",
-        "firstName": "FirstName",
-        "lastName": "LastName"
-    }},
-    "lastRegisteredTime": "{2}",
-    "experts": [
-        {{
-            "experts": [ "expert1@contoso.com", "expert2@contoso.com" ],
-            "__creatorId": "user1@contoso.com",
-            "modifiedTime": "{2}"
-        }}
-    ],
-
-    "__creatorId": "AdHocSample",
-    "modifiedTime": "{2}"
+     }},
+    "annotations": {{
+        "experts": [
+            {{
+                "properties" : {{
+                    "expert" :  {{ "upn": "expert1@contoso.com", "objectId": "7b682ded4d2b4a0c94edcebc160d0b00"}},
+                    "key" : "ebddb24cacac400396d3cb21c838d406--7b682ded4d2b4a0c94edcebc160d0b00",
+                    "fromSourceSystem": false
+                }}
+            }},
+            {{
+                "properties" : {{
+                    "expert" :  {{ "upn": "expert2@contoso.com", "objectId": "91059c1661d244d79effcb573f20948b"}},
+                    "key" : "ebddb24cacac400396d3cb21c838d406--91059c1661d244d79effcb573f20948b",
+                    "fromSourceSystem": false
+                }}
+            }}
+        ]
+    }}
 }}
