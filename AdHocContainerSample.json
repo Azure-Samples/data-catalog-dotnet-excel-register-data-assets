@@ -10,7 +10,7 @@
         "dsl":
         {{
             "protocol": "tds",
-            "authentication": "sql",
+            "authentication": "protocol",
             "address":
             {{
                 "server": "APISample\\APIAdHocSample1",
