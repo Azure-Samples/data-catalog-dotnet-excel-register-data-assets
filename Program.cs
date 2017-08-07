@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Net;
 using System.IO;
 using System.Data;
+using System.ServiceModel;
+using System.Threading.Tasks;
 using GetStartedADCExtensions;
 
 //Install-Package EnterpriseLibrary.TransientFaultHandling
@@ -21,7 +23,7 @@ namespace ConsoleApplication
 
         //Note: To find the Catalog name, sign into Azure Data Catalog, and choose User. You will see the Catalog name.
         static string catalogName = "DefaultCatalog";
-        static AuthenticationResult authResult = AccessToken();
+        static AuthenticationResult authResult = AccessToken().Result;
         static string sampleRootPath = string.Empty;
 
         static RetryPolicy retryPolicy;
@@ -30,10 +32,11 @@ namespace ConsoleApplication
         {
             DirectoryInfo di = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             sampleRootPath = di.Parent.Parent.FullName;
+            string upn = authResult.UserInfo.DisplayableId;
 
             //Register the data source container
             string jsonContainerTemplate = new StreamReader(string.Format(@"{0}\AdHocContainerSample.json", sampleRootPath)).ReadToEnd();
-            string jsonContainerPayload = string.Format(jsonContainerTemplate, DateTime.UtcNow);
+            string jsonContainerPayload = string.Format(jsonContainerTemplate, upn);
 
             retryPolicy = new RetryPolicy(
                 new HttpRequestTransientErrorDetectionStrategy(),
@@ -57,7 +60,7 @@ namespace ConsoleApplication
         // AuthenticationContext is part of the Active Directory Authentication Library NuGet package
         // To install the Active Directory Authentication Library NuGet package in Visual Studio, 
         //  run "Install-Package Microsoft.IdentityModel.Clients.ActiveDirectory" from the NuGet Package Manager Console.
-        static AuthenticationResult AccessToken()
+        static async Task<AuthenticationResult> AccessToken()
         {
             if (authResult == null)
             {
@@ -78,7 +81,7 @@ namespace ConsoleApplication
 
                 // Call AcquireToken to get an Azure token from Azure Active Directory token issuance endpoint
                 //  AcquireToken takes a Client Id that Azure AD creates when you register your client app.
-                authResult = authContext.AcquireToken(resourceUri, clientId, new Uri(redirectUri), PromptBehavior.RefreshSession);
+                authResult = await authContext.AcquireTokenAsync(resourceUri, clientId, new Uri(redirectUri), new PlatformParameters(PromptBehavior.Always));
             }
 
             return authResult;
@@ -114,7 +117,7 @@ namespace ConsoleApplication
                 description = row["Description"].ToString();
 
                 //Create the JSON payload from Table column
-                jsonAssetPayload = string.Format(jsonAssetTemplate, containerId, name);
+                jsonAssetPayload = string.Format(jsonAssetTemplate, containerId, name, authResult.UserInfo.DisplayableId);
 
                 //Use the container id returned from the registration of the container to register the asset.
                 //To register a data asset, use "tables" as view type
@@ -233,7 +236,7 @@ namespace ConsoleApplication
                 string guid = Guid.NewGuid().ToString();
                 request.Headers.Add("x-ms-client-request-id", guid);
                 //To authorize the operation call, you need an access token which is part of the Authorization header
-                request.Headers.Add("Authorization", AccessToken().CreateAuthorizationHeader());
+                request.Headers.Add("Authorization", AccessToken().Result.CreateAuthorizationHeader());
                 //Set to false to be able to intercept redirects
                 request.AllowAutoRedirect = false;
 

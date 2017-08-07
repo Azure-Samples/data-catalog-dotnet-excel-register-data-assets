@@ -18,9 +18,7 @@
             }}
         }},
         "lastRegisteredBy": {{
-            "upn": "user1@contoso.com",
-            "firstName": "FirstName",
-            "lastName": "LastName"
+            "upn": "{2}"
         }}
      }},
     "annotations": {{
